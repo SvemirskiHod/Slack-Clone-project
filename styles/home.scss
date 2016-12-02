@@ -14,6 +14,7 @@ html, body {
 
 nav {
   height: 40px;
+  line-height: 40px;
   padding: 8px;
   border-bottom: 1px solid black;
   background-color: tomato;
@@ -21,6 +22,12 @@ nav {
 
 nav h1 {
   margin: 0;
+  float: left;
+}
+
+.activeUsers{
+  float: right;
+  font-size: 18px;
 }
 
 #message-list {

@@ -3,19 +3,9 @@ import ChatBar from './ChatBar.jsx';
 import MessageList from './MessageList.jsx';
 
 const data = {
+  activeUsers: null,
   currentUser: {name: "Bob"}, // optional. if currentUser is not defined, it means the user is Anonymous
-  messages: [
-    {
-      username: "Bob",
-      content: "Has anyone seen my marbles?",
-      id: 1
-    },
-    {
-      username: "Anonymous",
-      content: "No, I think you lost them. You lost your marbles Bob. You lost them for good.",
-      id: 2
-    }
-  ]
+  messages: []
 };
 
 
@@ -29,8 +19,21 @@ class App extends Component {
     this.socket = new WebSocket("ws://localhost:4000");
     this.socket.onmessage = (message) => {
       let parsedMessage = JSON.parse(message.data);
-      const messages = this.state.messages.concat(parsedMessage);
-      this.setState({messages: messages})
+
+      if(isNaN(parsedMessage)){
+        if(parsedMessage.type === "incomingNotification"){
+          parsedMessage.type = "message system";
+        }
+        else if (parsedMessage.type === "incomingMessage"){
+          parsedMessage.type = "message";
+        }
+        const messages = this.state.messages.concat(parsedMessage);
+        this.setState({messages: messages})
+      }
+
+      if(!isNaN(parsedMessage)){
+        this.setState({activeUsers: parsedMessage});
+      }
     }
   }
 
@@ -41,7 +44,6 @@ class App extends Component {
   }
 
   updateMessages(newMessage) {
-
     this.socket.send(JSON.stringify(newMessage));
   }
 
@@ -51,6 +53,7 @@ class App extends Component {
        <div className="wrapper">
          <nav>
           <h1>Chatty</h1>
+          <span className="activeUsers"> {this.state.activeUsers} user(s) online </span>
          </nav>
          <MessageList messages={this.state.messages}/>
          <ChatBar updateMessages={this.updateMessages.bind(this)}

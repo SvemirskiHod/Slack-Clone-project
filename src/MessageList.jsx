@@ -8,9 +8,7 @@ class MessageList extends Component {
         {this.props.messages.map(function(message){
           return (<Message key={message.id} messageData={message}/>)
         })}
-        <div class="message system">
-          Anonymous1 changed their name to nomnom.
-        </div>
+
       </div>
     );
   }

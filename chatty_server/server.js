@@ -26,15 +26,59 @@ wss.broadcast = function broadcast(data) {
   });
 };
 
+let activeUsers = 0;
+let clients = [];
+let colors = ["green", "blue", "red", "purple", "navy", "orange", "darkorchid", "lightgreen", "skyblue", "thistle"];
+
 wss.on('connection', (ws) => {
   console.log('Client connected');
+
+  clients[ws] = colors[Math.floor(Math.random()* 10)];
+
+  activeUsers ++;
+  wss.broadcast(JSON.stringify(activeUsers));
 
   ws.on('message', function incoming(message){
     let parsedMessage = JSON.parse(message)
     parsedMessage.id = uuidV1();
+    parsedMessage.color = clients[ws];
+    switch(parsedMessage.type){
+      case "postNotification":
+        parsedMessage.type = "incomingNotification";
+        break;
+      case "postMessage":
+        parsedMessage.type = "incomingMessage";
+        break;
+      default:
+        throw new Error("Unknown event type ", parsed.Message.type )
+    }
     wss.broadcast(JSON.stringify(parsedMessage));
   })
 
   // Set up a callback for when a client closes the socket. This usually means they closed their browser.
-  ws.on('close', () => console.log('Client disconnected'));
+  ws.on('close', () => {
+    console.log('Client disconnected');
+    activeUsers -- ;
+    wss.broadcast(JSON.stringify(activeUsers));
+  });
+
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
